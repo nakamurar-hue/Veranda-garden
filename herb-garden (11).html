@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ベランダ栽培ノート</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Shippori+Mincho:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green-deep:#1a4a2e;--green-mid:#2d7a4f;--green-soft:#4caf7d;
+  --green-pale:#c8e6c9;--green-mist:#f0f7f1;--amber-pale:#fdf3dc;
+  --earth:#6b4c2a;--cream:#faf8f3;--text:#1c2e1f;--text-mid:#4a5e4c;
+  --text-soft:#8aa48c;--border:rgba(45,122,79,0.15);--border-mid:rgba(45,122,79,0.3);
+  --radius:14px;--radius-sm:8px;--red-pale:#fdecea;--red:#c0392b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Zen Maru Gothic',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;padding-bottom:80px}
+.header{background:var(--green-deep);padding:20px 20px 16px;position:sticky;top:0;z-index:100}
+.header-inner{max-width:500px;margin:0 auto;display:flex;align-items:center;gap:10px}
+.header-title{font-family:'Shippori Mincho',serif;font-size:18px;font-weight:500;color:#fff;letter-spacing:.05em}
+.header-sub{font-size:11px;color:rgba(255,255,255,.55);margin-left:auto}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:.5px solid var(--border-mid);display:flex;z-index:100}
+.nav-btn{flex:1;border:none;background:none;padding:10px 4px 12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text-soft);font-family:'Zen Maru Gothic',sans-serif;font-size:10px}
+.nav-btn.active{color:var(--green-mid)}
+.nav-icon{font-size:20px}
+.content{max-width:500px;margin:0 auto;padding:16px 16px 0}
+.section{display:none}.section.active{display:block}
+.plant-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
+.plant-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:14px 12px 12px;transition:border-color .15s,transform .1s;position:relative;overflow:hidden}
+.plant-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--green-pale);transition:background .15s}
+.plant-card:hover{transform:translateY(-1px);border-color:var(--border-mid)}
+.plant-card.selected{border-color:var(--green-mid);background:var(--green-mist)}
+.plant-card.selected::before{background:var(--green-soft)}
+.plant-card-tap{cursor:pointer}
+.plant-card-icon{font-size:28px;margin-bottom:5px}
+.plant-card-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px}
+.plant-card-days{font-size:11px;color:var(--green-mid);background:var(--green-mist);display:inline-block;padding:1px 8px;border-radius:20px}
+.plant-card-actions{display:flex;gap:4px;margin-top:8px;padding-top:8px;border-top:.5px solid var(--border)}
+.card-action-btn{flex:1;border:none;background:none;font-family:'Zen Maru Gothic',sans-serif;font-size:11px;cursor:pointer;padding:4px 0;border-radius:var(--radius-sm);color:var(--text-soft)}
+.card-action-btn:hover{background:var(--green-mist);color:var(--green-mid)}
+.card-action-btn.del:hover{background:var(--red-pale);color:var(--red)}
+.add-card{background:none;border:1.5px dashed var(--border-mid);border-radius:var(--radius);padding:16px 14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--text-soft);font-family:'Zen Maru Gothic',sans-serif;font-size:13px;min-height:100px}
+.add-card:hover{border-color:var(--green-mid);color:var(--green-mid)}
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:10px}
+.card-title{font-size:13px;font-weight:700;color:var(--text-mid);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat{background:var(--green-mist);border-radius:var(--radius-sm);padding:10px;text-align:center}
+.stat-num{font-size:22px;font-weight:700;color:var(--green-deep)}
+.stat-lbl{font-size:10px;color:var(--text-soft);margin-top:1px}
+.progress-track{height:6px;background:var(--green-pale);border-radius:6px;overflow:hidden;margin-bottom:12px}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--green-mid),var(--green-soft));border-radius:6px;transition:width .4s ease}
+.check-section-label{font-size:10px;font-weight:700;color:var(--text-soft);text-transform:uppercase;letter-spacing:.08em;padding:10px 0 4px}
+.check-item{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:.5px solid var(--border);cursor:pointer}
+.check-item:last-child{border-bottom:none}
+.check-box{width:18px;height:18px;border:1.5px solid var(--border-mid);border-radius:5px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:11px}
+.check-item.done .check-box{background:var(--green-mid);border-color:var(--green-mid);color:#fff}
+.check-label{flex:1;font-size:13px;color:var(--text);line-height:1.45}
+.check-item.done .check-label{color:var(--text-soft);text-decoration:line-through}
+.freq-tag{font-size:10px;padding:2px 7px;border-radius:20px;flex-shrink:0;margin-top:2px}
+.f-daily{background:var(--amber-pale);color:var(--earth)}
+.f-week{background:var(--green-pale);color:var(--green-deep)}
+.f-any{background:#e8f0fe;color:#1a56a0}
+.step-item{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:.5px solid var(--border);font-size:13px;color:var(--text-mid);line-height:1.5}
+.step-item:last-child{border-bottom:none}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--green-pale);color:var(--green-deep);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step-key{width:22px;height:22px;border-radius:50%;background:var(--amber-pale);color:var(--earth);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tip-box{background:var(--green-mist);border-left:3px solid var(--green-soft);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:10px 12px;font-size:12px;color:var(--green-deep);line-height:1.6;margin-top:10px}
+.memo-area{width:100%;font-size:13px;font-family:'Zen Maru Gothic',sans-serif;color:var(--text);background:var(--green-mist);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;resize:vertical;min-height:70px;outline:none}
+.memo-area:focus{border-color:var(--green-mid)}
+.btn-save{margin-top:8px;background:var(--green-deep);color:#fff;border:none;border-radius:var(--radius-sm);padding:8px 20px;font-size:13px;font-family:'Zen Maru Gothic',sans-serif;cursor:pointer}
+.log-entry{padding:10px 0;border-bottom:.5px solid var(--border)}
+.log-entry:last-child{border-bottom:none}
+.log-date{font-size:10px;color:var(--text-soft);margin-bottom:3px}
+.log-text{font-size:13px;color:var(--text-mid);line-height:1.5}
+.empty{font-size:13px;color:var(--text-soft);text-align:center;padding:20px 0}
+.reset-btn{font-size:11px;color:var(--text-soft);background:none;border:none;cursor:pointer;font-family:'Zen Maru Gothic',sans-serif;padding:4px 0;display:block;margin:4px auto 0}
+.hint{background:var(--amber-pale);border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;color:var(--earth);line-height:1.6;margin-bottom:12px}
+/* AI生成中 */
+.ai-loading{display:flex;flex-direction:column;align-items:center;gap:14px;padding:32px 16px;color:var(--text-soft)}
+.ai-loading-icon{font-size:32px;animation:spin 2s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-loading-text{font-size:13px;text-align:center;line-height:1.7}
+.ai-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 8px;border-radius:20px;background:#e8f0fe;color:#1a56a0;margin-left:6px;vertical-align:middle}
+.ai-error{background:var(--red-pale);border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;color:var(--red);line-height:1.6;margin-bottom:10px}
+.ai-retry-btn{font-size:12px;background:none;border:1px solid var(--red);border-radius:var(--radius-sm);padding:5px 14px;color:var(--red);cursor:pointer;font-family:'Zen Maru Gothic',sans-serif;margin-top:8px}
+/* モーダル */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(26,74,46,.5);z-index:200;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--cream);border-radius:20px 20px 0 0;padding:24px 20px 32px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto}
+.modal-title{font-family:'Shippori Mincho',serif;font-size:17px;color:var(--green-deep);margin-bottom:18px;font-weight:500}
+.field{margin-bottom:14px}
+.field label{font-size:11px;color:var(--text-soft);font-weight:700;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.07em}
+.field input[type=text],.field input[type=date],.field textarea{width:100%;font-size:14px;font-family:'Zen Maru Gothic',sans-serif;color:var(--text);background:#fff;border:1px solid var(--border-mid);border-radius:var(--radius-sm);padding:9px 12px;outline:none}
+.icon-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.icon-opt{font-size:22px;width:42px;height:42px;border:1.5px solid var(--border);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;background:#fff}
+.icon-opt.sel{border-color:var(--green-mid);background:var(--green-mist)}
+.modal-btns{display:flex;gap:8px;margin-top:18px}
+.btn-cancel{flex:1;background:#fff;border:1px solid var(--border-mid);border-radius:var(--radius-sm);padding:10px;font-size:13px;font-family:'Zen Maru Gothic',sans-serif;cursor:pointer;color:var(--text-mid)}
+.btn-primary{flex:2;background:var(--green-deep);border:none;border-radius:var(--radius-sm);padding:10px;font-size:13px;font-family:'Zen Maru Gothic',sans-serif;cursor:pointer;color:#fff}
+.btn-danger{flex:1;background:var(--red-pale);border:1px solid rgba(192,57,43,.3);border-radius:var(--radius-sm);padding:10px;font-size:13px;font-family:'Zen Maru Gothic',sans-serif;cursor:pointer;color:var(--red)}
+.confirm-overlay{display:none;position:fixed;inset:0;background:rgba(26,74,46,.5);z-index:300;align-items:center;justify-content:center}
+.confirm-overlay.open{display:flex}
+.confirm-box{background:#fff;border-radius:var(--radius);padding:24px 20px 20px;width:88%;max-width:320px;text-align:center}
+.confirm-msg{font-size:14px;color:var(--text);line-height:1.6;margin-bottom:18px}
+.confirm-btns{display:flex;gap:8px}
+/* JSON貼り付け欄 */
+.json-paste-area{width:100%;font-size:11px;font-family:monospace;color:var(--text);background:var(--green-mist);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;resize:vertical;min-height:80px;outline:none}
+.json-paste-area:focus{border-color:var(--green-mid)}
+.json-hint{font-size:11px;color:var(--text-soft);line-height:1.6;margin-bottom:6px;background:var(--amber-pale);border-radius:var(--radius-sm);padding:8px 10px}
+.json-result{font-size:12px;padding:6px 10px;border-radius:var(--radius-sm);margin-top:6px}
+.json-ok{background:#EAF3DE;color:#27500A}
+.json-err{background:var(--red-pale);color:var(--red)}
+/* 写真添付 */
+.photo-upload-btn{display:flex;align-items:center;gap:6px;background:var(--green-mist);border:1.5px dashed var(--border-mid);border-radius:var(--radius-sm);padding:8px 14px;font-size:13px;font-family:'Zen Maru Gothic',sans-serif;color:var(--green-mid);cursor:pointer;width:100%;margin-top:8px;justify-content:center}
+.photo-upload-btn:hover{border-color:var(--green-mid);background:var(--green-pale)}
+.photo-preview{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+.photo-thumb{width:72px;height:72px;object-fit:cover;border-radius:var(--radius-sm);border:1px solid var(--border-mid)}
+.photo-thumb-wrap{position:relative;display:inline-block}
+.photo-thumb-del{position:absolute;top:-6px;right:-6px;width:18px;height:18px;background:var(--red);color:#fff;border:none;border-radius:50%;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+/* 記録エントリ */
+.log-entry-inner{display:flex;gap:8px;align-items:flex-start}
+.log-entry-body{flex:1;min-width:0}
+.log-entry-actions{display:flex;gap:4px;flex-shrink:0;margin-top:2px}
+.log-act-btn{border:none;background:none;font-size:11px;color:var(--text-soft);cursor:pointer;padding:2px 6px;border-radius:4px;font-family:'Zen Maru Gothic',sans-serif}
+.log-act-btn:hover{background:var(--green-mist);color:var(--green-mid)}
+.log-act-btn.del:hover{background:var(--red-pale);color:var(--red)}
+.log-photos{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.log-photo{width:80px;height:80px;object-fit:cover;border-radius:var(--radius-sm);border:1px solid var(--border);cursor:pointer}
+/* リマインダーバナー */
+.reminder-banner{background:linear-gradient(135deg,#e8f5e9,#f1f8e9);border:1px solid var(--green-soft);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px;display:flex;align-items:flex-start;gap:10px}
+.reminder-banner-icon{font-size:22px;flex-shrink:0}
+.reminder-banner-body{flex:1}
+.reminder-banner-title{font-size:13px;font-weight:700;color:var(--green-deep);margin-bottom:3px}
+.reminder-banner-text{font-size:12px;color:var(--text-mid);line-height:1.5}
+.reminder-banner-close{font-size:16px;color:var(--text-soft);cursor:pointer;background:none;border:none;flex-shrink:0;padding:0}
+.reminder-urgent{background:linear-gradient(135deg,#fff8e1,#fff3cd);border-color:var(--earth)}
+/* 写真モーダル */
+.photo-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;align-items:center;justify-content:center}
+.photo-modal.open{display:flex}
+.photo-modal img{max-width:95vw;max-height:90vh;border-radius:var(--radius-sm);object-fit:contain}
+.photo-modal-close{position:fixed;top:16px;right:16px;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:24px;width:40px;height:40px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}
+/* 記録編集モーダル */
+.edit-log-area{width:100%;font-size:13px;font-family:'Zen Maru Gothic',sans-serif;color:var(--text);background:#fff;border:1px solid var(--border-mid);border-radius:var(--radius-sm);padding:10px 12px;resize:vertical;min-height:80px;outline:none}
+.edit-log-area:focus{border-color:var(--green-mid)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <span style="font-size:22px">🌿</span>
+    <span class="header-title">ベランダ栽培ノート</span>
+    <span class="header-sub" id="today-date"></span>
+  </div>
+</div>
+<div class="content">
+  <div id="sec-home" class="section active">
+    <div class="plant-grid" id="plant-grid"></div>
+    <div class="hint" id="home-hint" style="display:none">植物カードを選ぶと、チェック・How-to・記録が使えます</div>
+  </div>
+
+  <div id="sec-check" class="section">
+    <div id="check-empty" class="empty">マイ植物タブで植物を選んでください</div>
+    <div id="check-content" style="display:none">
+      <div class="stat-grid">
+        <div class="stat"><div class="stat-num" id="ck-done">0</div><div class="stat-lbl">完了</div></div>
+        <div class="stat"><div class="stat-num" id="ck-total">0</div><div class="stat-lbl">全項目</div></div>
+        <div class="stat"><div class="stat-num" id="ck-pct">0%</div><div class="stat-lbl">達成率</div></div>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="ck-bar" style="width:0%"></div></div>
+      <div class="card">
+        <div class="card-title"><span id="ck-icon"></span><span id="ck-name">チェックリスト</span></div>
+        <div id="ck-list"></div>
+      </div>
+      <button class="reset-btn" onclick="resetChecks()">チェックをリセットする</button>
+    </div>
+  </div>
+
+  <div id="sec-howto" class="section">
+    <div id="howto-empty" class="empty">マイ植物タブで植物を選んでください</div>
+    <div id="howto-content" style="display:none">
+      <div style="display:flex;align-items:center;gap:8px;padding:4px 0 12px">
+        <span id="ht-plant-icon" style="font-size:22px"></span>
+        <span id="ht-plant-name" style="font-family:'Shippori Mincho',serif;font-size:16px;font-weight:500;color:var(--green-deep)"></span>
+        <span style="font-size:12px;color:var(--text-soft);margin-left:2px">の育て方</span>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>🪴</span>植え付け手順</div>
+        <ul style="list-style:none" id="ht-steps"></ul>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>🌤</span>日々のお世話</div>
+        <ul style="list-style:none" id="ht-care"></ul>
+      </div>
+      <div class="tip-box" id="ht-tip"></div>
+    </div>
+  </div>
+
+  <div id="sec-log" class="section">
+    <div id="log-empty" class="empty">マイ植物タブで植物を選んでください</div>
+    <div id="log-content" style="display:none">
+      <!-- リマインダーバナー -->
+      <div id="reminder-area"></div>
+      <div class="card">
+        <div class="card-title"><span id="log-icon"></span><span id="log-name">栽培メモ</span></div>
+        <textarea class="memo-area" id="memo-input" placeholder="例：新芽が5cm伸びた。収穫してオリーブオイル漬けに。"></textarea>
+        <!-- 写真添付 -->
+        <input type="file" id="photo-input" accept="image/*" capture="environment" style="display:none" multiple onchange="handlePhotoSelect(event)">
+        <button class="photo-upload-btn" onclick="document.getElementById('photo-input').click()">📷 写真を追加（任意）</button>
+        <div class="photo-preview" id="photo-preview"></div>
+        <button class="btn-save" onclick="saveMemo()" style="margin-top:10px">保存する</button>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>📋</span>記録一覧</div>
+        <div id="log-list"><div class="empty">まだ記録がありません</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" onclick="showTab('home',this)"><span class="nav-icon">🪴</span>マイ植物</button>
+  <button class="nav-btn" onclick="showTab('check',this)"><span class="nav-icon">✅</span>チェック</button>
+  <button class="nav-btn" onclick="showTab('howto',this)"><span class="nav-icon">📖</span>How-to</button>
+  <button class="nav-btn" onclick="showTab('log',this)"><span class="nav-icon">📝</span>記録</button>
+</nav>
+
+<!-- 追加モーダル -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <div class="modal-title">🌱 植物を追加</div>
+    <!-- モードタブ -->
+    <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:1px solid var(--border-mid)">
+      <button id="mode-normal-btn" onclick="switchAddMode('normal')" style="flex:1;border:none;background:none;font-family:'Zen Maru Gothic',sans-serif;font-size:13px;padding:8px;cursor:pointer;border-bottom:2px solid var(--green-mid);color:var(--green-deep);font-weight:700;margin-bottom:-1px">通常追加</button>
+      <button id="mode-json-btn" onclick="switchAddMode('json')" style="flex:1;border:none;background:none;font-family:'Zen Maru Gothic',sans-serif;font-size:13px;padding:8px;cursor:pointer;border-bottom:2px solid transparent;color:var(--text-soft);margin-bottom:-1px">📋 Claudeデータを貼り付け</button>
+    </div>
+    <!-- 通常モード -->
+    <div id="add-mode-normal">
+      <div class="field"><label>植物名</label><input type="text" id="new-name" placeholder="例：ラベンダー"></div>
+      <div class="field">
+        <label>アイコン</label>
+        <div class="icon-grid" id="add-icon-grid">
+          <div class="icon-opt sel" onclick="selIcon('add',this,'🌿')">🌿</div>
+          <div class="icon-opt" onclick="selIcon('add',this,'🌱')">🌱</div>
+          <div class="icon-opt" onclick="selIcon('add',this,'🌼')">🌼</div>
+          <div class="icon-opt" onclick="selIcon('add',this,'🌸')">🌸</div>
+          <div class="icon-opt" onclick="selIcon('add',this,'🍀')">🍀</div>
+          <div class="icon-opt" onclick="selIcon('add',this,'🍃')">🍃</div>
+          <div class="icon-opt" onclick="selIcon('add',this,'🌾')">🌾</div>
+          <div class="icon-opt" onclick="selIcon('add',this,'🪴')">🪴</div>
+          <div class="icon-opt" onclick="selIcon('add',this,'🌵')">🌵</div>
+          <div class="icon-opt" onclick="selIcon('add',this,'🎍')">🎍</div>
+        </div>
+      </div>
+      <div class="field"><label>栽培開始日</label><input type="date" id="new-date"></div>
+      <div class="field"><label>メモ（任意）</label><textarea style="min-height:44px;font-family:'Zen Maru Gothic',sans-serif;font-size:13px;background:#fff;border:1px solid var(--border-mid);border-radius:8px;padding:9px 12px;width:100%;resize:none;outline:none;color:var(--text)" id="new-memo" placeholder="品種・購入店など"></textarea></div>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeAddModal()">キャンセル</button>
+        <button class="btn-primary" onclick="addPlant()">追加する</button>
+      </div>
+    </div>
+    <!-- JSONモード -->
+    <div id="add-mode-json" style="display:none">
+      <div class="json-hint">
+        このチャット画面で「<strong>〇〇のデータを生成して</strong>」と送ると、Claudeがデータを返します。<br>
+        返ってきたJSONをそのまま下に貼り付けてください。
+      </div>
+      <div class="field"><label>植物名</label><input type="text" id="json-name" placeholder="例：ラベンダー"></div>
+      <div class="field">
+        <label>アイコン</label>
+        <div class="icon-grid" id="json-icon-grid">
+          <div class="icon-opt sel" onclick="selIcon('json',this,'🌿')">🌿</div>
+          <div class="icon-opt" onclick="selIcon('json',this,'🌱')">🌱</div>
+          <div class="icon-opt" onclick="selIcon('json',this,'🌼')">🌼</div>
+          <div class="icon-opt" onclick="selIcon('json',this,'🌸')">🌸</div>
+          <div class="icon-opt" onclick="selIcon('json',this,'🍀')">🍀</div>
+          <div class="icon-opt" onclick="selIcon('json',this,'🍃')">🍃</div>
+          <div class="icon-opt" onclick="selIcon('json',this,'🌾')">🌾</div>
+          <div class="icon-opt" onclick="selIcon('json',this,'🪴')">🪴</div>
+          <div class="icon-opt" onclick="selIcon('json',this,'🌵')">🌵</div>
+          <div class="icon-opt" onclick="selIcon('json',this,'🎍')">🎍</div>
+        </div>
+      </div>
+      <div class="field"><label>栽培開始日</label><input type="date" id="json-date"></div>
+      <div class="field">
+        <label>ClaudeのJSONを貼り付け</label>
+        <textarea class="json-paste-area" id="json-paste" placeholder='{"checks":[...],"steps":[...],"care":[...],"tip":"..."}' oninput="validateJson()"></textarea>
+        <div id="json-result" class="json-result" style="display:none"></div>
+      </div>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeAddModal()">キャンセル</button>
+        <button class="btn-primary" id="json-add-btn" onclick="addPlantFromJson()" disabled style="opacity:.5">登録する</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 編集モーダル -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-title">✏️ 植物を編集</div>
+    <div class="field"><label>植物名</label><input type="text" id="edit-name" placeholder="例：ラベンダー"></div>
+    <div class="field">
+      <label>アイコン</label>
+      <div class="icon-grid" id="edit-icon-grid">
+        <div class="icon-opt" onclick="selIcon('edit',this,'🌿')">🌿</div>
+        <div class="icon-opt" onclick="selIcon('edit',this,'🌱')">🌱</div>
+        <div class="icon-opt" onclick="selIcon('edit',this,'🌼')">🌼</div>
+        <div class="icon-opt" onclick="selIcon('edit',this,'🌸')">🌸</div>
+        <div class="icon-opt" onclick="selIcon('edit',this,'🍀')">🍀</div>
+        <div class="icon-opt" onclick="selIcon('edit',this,'🍃')">🍃</div>
+        <div class="icon-opt" onclick="selIcon('edit',this,'🌾')">🌾</div>
+        <div class="icon-opt" onclick="selIcon('edit',this,'🪴')">🪴</div>
+        <div class="icon-opt" onclick="selIcon('edit',this,'🌵')">🌵</div>
+        <div class="icon-opt" onclick="selIcon('edit',this,'🎍')">🎍</div>
+      </div>
+    </div>
+    <div class="field"><label>栽培開始日</label><input type="date" id="edit-date"></div>
+    <div class="field"><label>メモ（任意）</label><textarea style="min-height:44px;font-family:'Zen Maru Gothic',sans-serif;font-size:13px;background:#fff;border:1px solid var(--border-mid);border-radius:8px;padding:9px 12px;width:100%;resize:none;outline:none;color:var(--text)" id="edit-memo" placeholder="品種・購入店など"></textarea></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeEditModal()">キャンセル</button>
+      <button class="btn-primary" onclick="updatePlant()">保存する</button>
+    </div>
+  </div>
+</div>
+
+<!-- 削除確認 -->
+<div class="confirm-overlay" id="confirm-del">
+  <div class="confirm-box">
+    <div class="confirm-msg" id="confirm-msg"></div>
+    <div class="confirm-btns">
+      <button class="btn-cancel" style="flex:1" onclick="closeConfirm()">キャンセル</button>
+      <button class="btn-danger" style="flex:1" onclick="confirmDelete()">削除する</button>
+    </div>
+  </div>
+</div>
+
+<!-- 写真フルスクリーン -->
+<div class="photo-modal" id="photo-modal" onclick="closePhotoModal()">
+  <button class="photo-modal-close" onclick="closePhotoModal()">✕</button>
+  <img id="photo-modal-img" src="" alt="">
+</div>
+
+<!-- 記録編集モーダル -->
+<div class="modal-overlay" id="edit-log-modal">
+  <div class="modal">
+    <div class="modal-title">✏️ 記録を編集</div>
+    <div class="field">
+      <label>メモ内容</label>
+      <textarea class="edit-log-area" id="edit-log-text"></textarea>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeEditLogModal()">キャンセル</button>
+      <button class="btn-primary" onclick="saveEditLog()">保存する</button>
+    </div>
+  </div>
+</div>
+
+<!-- 記録削除確認 -->
+<div class="confirm-overlay" id="confirm-log-del">
+  <div class="confirm-box">
+    <div class="confirm-msg">この記録を削除しますか？</div>
+    <div class="confirm-btns">
+      <button class="btn-cancel" style="flex:1" onclick="closeLogConfirm()">キャンセル</button>
+      <button class="btn-danger" style="flex:1" onclick="confirmLogDelete()">削除する</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// 固定データ（ローズマリー・バジル・ミント）
+// ============================================================
+const BUILTIN = {
+  'ローズマリー':{
+    checks:[
+      {label:'土の乾燥を確認した',freq:'daily',cat:'💧 水やり'},
+      {label:'必要なら水やりをした（土が完全に乾いてから）',freq:'daily',cat:'💧 水やり'},
+      {label:'受け皿に水が溜まっていないか確認した',freq:'daily',cat:'💧 水やり'},
+      {label:'液肥を与えた（春・秋 月1回）',freq:'any',cat:'🌾 肥料'},
+      {label:'先端5〜10cmを収穫・剪定した',freq:'week',cat:'✂️ 剪定・収穫'},
+      {label:'アブラムシ・白い粉（うどんこ病）を確認した',freq:'week',cat:'🔍 病気・害虫'},
+      {label:'葉の色・ツヤに異常がないか確認した',freq:'week',cat:'🔍 病気・害虫'},
+    ],
+    steps:['鉢底ネットを敷き、鉢底石を2〜3cm敷いて排水層をつくる','ハーブ用培養土（水はけ重視）を鉢の1/3ほど入れる','苗をポットから優しく取り出す（根をほぐしすぎない）','根元が鉢のふちより2〜3cm下になるよう土を足す','鉢底から水が出るまでたっぷり水やりをする','最初の1週間は半日陰で根を慣らしてから日当たりへ'],
+    care:[{k:'水やり',v:'土が完全に乾いて1〜2日後にたっぷり。週1〜2回が目安。受け皿に水を溜めない'},{k:'日当たり',v:'西日OK。日光が好きなので遮らない場所へ。夏の熱い時間帯の水やりは避ける'},{k:'剪定・収穫',v:'先端5〜10cmをハサミで摘む。こまめに摘むと株が茂る。株の1/3以上は切らない'},{k:'肥料',v:'春・秋に液肥を月1回。元肥入り培養土なら最初の2〜3ヶ月は不要'},{k:'冬越し',v:'霜が当たらない場所へ移動するだけでOK。室内取り込み不要'}],
+    tip:'失敗の原因1位は水のやりすぎ。「乾いてから水やり」を徹底すると根腐れを防げます。乾燥気味に育てるほど香りが強くなります。',
+  },
+  'バジル':{
+    checks:[
+      {label:'水やりをした（乾燥に弱いので毎日確認）',freq:'daily',cat:'💧 水やり'},
+      {label:'西日後に葉が萎れていないか確認した',freq:'daily',cat:'💧 水やり'},
+      {label:'気温が15℃以下なら室内に取り込んだ',freq:'any',cat:'🌡 温度管理'},
+      {label:'液肥を与えた（月1〜2回）',freq:'any',cat:'🌾 肥料'},
+      {label:'花芽が出ていれば摘み取った',freq:'week',cat:'✂️ 剪定・収穫'},
+      {label:'葉が大きく育っていれば収穫した',freq:'week',cat:'✂️ 剪定・収穫'},
+      {label:'コバエ・アブラムシの発生を確認した',freq:'week',cat:'🔍 病気・害虫'},
+    ],
+    steps:['鉢底ネットを敷き、鉢底石を2〜3cm敷く','水はけの良い培養土を使用。株間は10cm以上あける','苗を植えたらたっぷり水やり。植え付け直後は直射日光を避ける','本葉が6〜8枚になったら「摘心」を行い脇芽を増やす'],
+    care:[{k:'水やり',v:'乾燥に弱め。毎日〜1日おきに確認。西日後の夕方に水やりすると◎'},{k:'日当たり',v:'夏の日差しが大好き。西向きベランダと相性良い'},{k:'剪定・収穫',v:'花芽が出たらすぐ摘み取ると葉の収穫期間が延びる'},{k:'肥料',v:'生育旺盛なので月1〜2回液肥を。与えすぎると香りが弱くなる'},{k:'冬越し',v:'寒さに弱い。10月中旬を目安に室内へ取り込む'}],
+    tip:'花芽の摘み取りが収穫量を増やす最大のコツ。花が咲くと葉が硬くなり風味が落ちるので、こまめに確認しましょう。',
+  },
+  'ミント':{
+    checks:[
+      {label:'土の表面が乾いたら水やりをした',freq:'daily',cat:'💧 水やり'},
+      {label:'西日の直撃を避けた場所に置いているか確認した',freq:'daily',cat:'☀️ 置き場'},
+      {label:'他の鉢に地下茎が侵入していないか確認した',freq:'week',cat:'⚠️ 管理'},
+      {label:'液肥を与えた（月1〜2回）',freq:'any',cat:'🌾 肥料'},
+      {label:'株が密になりすぎていないか確認・収穫した',freq:'week',cat:'✂️ 剪定・収穫'},
+      {label:'蚊・アブラムシの発生を確認した',freq:'week',cat:'🔍 病気・害虫'},
+      {label:'葉焼け（茶色い斑点）がないか確認した',freq:'week',cat:'🔍 病気・害虫'},
+    ],
+    steps:['必ず単独の鉢を用意（地下茎が他の鉢に侵入するため）','水はけより水もちを重視した培養土を使う','植え付け後は半日陰〜日陰で1週間ほど慣らす','西日が強い場所は葉焼けリスクあり。壁際やベランダ奥に置く'],
+    care:[{k:'水やり',v:'水好き。土の表面が乾いたらすぐに水やり'},{k:'日当たり',v:'半日陰でもよく育つ。西日の直撃は避けて壁際やベランダ奥に'},{k:'剪定・収穫',v:'どんどん増えるので定期的に収穫して株を締める'},{k:'肥料',v:'繁殖力が強いので控えめに。月1〜2回液肥を薄めに'},{k:'管理',v:'必ず単独鉢で管理。2週間に1回は形を整えること'}],
+    tip:'ミントは放置するとジャングル化します。2週間に1回は先端を収穫して形を整えましょう。',
+  },
+};
+
+// ============================================================
+// ストレージ
+// ============================================================
+let plants  = JSON.parse(localStorage.getItem('hg_plants')  || '[]');
+let checks  = JSON.parse(localStorage.getItem('hg_checks2') || '{}');
+let logs    = JSON.parse(localStorage.getItem('hg_logs')    || '{}');
+let aiCache = JSON.parse(localStorage.getItem('hg_ai')      || '{}');
+let waterLog = JSON.parse(localStorage.getItem('hg_water')  || '{}'); // 植物ID→最終水やり日
+
+if (!plants.length) {
+  plants = [{id:1, name:'ローズマリー', icon:'🌿', since:'', memo:''}];
+  savePlants();
+}
+
+let selectedId  = null;
+let addIcon     = '🌿';
+let editIcon    = '🌿';
+let editingId   = null;
+let deletingId  = null;
+
+function savePlants() { localStorage.setItem('hg_plants',  JSON.stringify(plants)); }
+function saveChecks() { localStorage.setItem('hg_checks2', JSON.stringify(checks)); }
+function saveLogs()   { localStorage.setItem('hg_logs',    JSON.stringify(logs)); }
+function saveAI()     { localStorage.setItem('hg_ai',      JSON.stringify(aiCache)); }
+function saveWater()  { localStorage.setItem('hg_water',   JSON.stringify(waterLog)); }
+
+function today() {
+  const d = new Date();
+  return d.getFullYear()+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0');
+}
+function weekKey() {
+  const d = new Date(), sun = new Date(d);
+  sun.setDate(d.getDate()-d.getDay());
+  return `week:${sun.getFullYear()}-${String(sun.getMonth()+1).padStart(2,'0')}-${String(sun.getDate()).padStart(2,'0')}`;
+}
+function dateKeyFor(freq){ return freq==='daily'?today():freq==='week'?weekKey():'any'; }
+function ckKey(pid,freq){ return `${pid}::${dateKeyFor(freq)}`; }
+function isChecked(pid,freq,idx){ const k=ckKey(pid,freq); return !!(checks[k]&&checks[k][idx]); }
+function setChecked(pid,freq,idx,val){ const k=ckKey(pid,freq); if(!checks[k])checks[k]={}; checks[k][idx]=val; saveChecks(); }
+function daysSince(s){ if(!s)return null; return Math.max(1,Math.floor((Date.now()-new Date(s).getTime())/86400000)+1); }
+
+document.getElementById('today-date').textContent = today().replace(/\//g,'.');
+
+// ============================================================
+// 植物データ取得（固定 or AIキャッシュ or API生成）
+// ============================================================
+function getBuiltin(name) {
+  for (const k of Object.keys(BUILTIN)) {
+    if (name.includes(k)) return BUILTIN[k];
+  }
+  return null;
+}
+
+async function fetchPlantData(name) {
+  // 1. 固定データにあれば即返す
+  const builtin = getBuiltin(name);
+  if (builtin) return { data: builtin, source: 'builtin' };
+
+  // 2. AIキャッシュにあれば返す
+  if (aiCache[name]) return { data: aiCache[name], source: 'cache' };
+
+  // 3. キャッシュになければ null（JSONモードで登録が必要）
+  return null;
+}
+
+// ============================================================
+// タブ
+// ============================================================
+function showTab(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  btn.classList.add('active');
+  if (id==='check') renderCheck();
+  if (id==='howto') renderHowto();
+  if (id==='log')   renderLog();
+}
+
+// ============================================================
+// マイ植物
+// ============================================================
+function renderHome() {
+  const grid = document.getElementById('plant-grid');
+  grid.innerHTML = plants.map(p => {
+    const days = daysSince(p.since);
+    const aiMark = !getBuiltin(p.name) && aiCache[p.name]
+      ? `<span class="ai-badge">✨ AI</span>` : '';
+    return `<div class="plant-card${selectedId===p.id?' selected':''}">
+      <div class="plant-card-tap" onclick="selectPlant(${p.id})">
+        <div class="plant-card-icon">${p.icon}</div>
+        <div class="plant-card-name">${p.name}${aiMark}</div>
+        ${days!==null
+          ? `<span class="plant-card-days">栽培${days}日目</span>`
+          : `<span class="plant-card-days" style="background:var(--amber-pale);color:var(--earth)">日付未設定</span>`}
+      </div>
+      <div class="plant-card-actions">
+        <button class="card-action-btn" onclick="openEditModal(${p.id})">✎ 編集</button>
+        <button class="card-action-btn del" onclick="openConfirmDelete(${p.id})">🗑 削除</button>
+      </div>
+    </div>`;
+  }).join('') + `<div class="add-card" onclick="openAddModal()"><span style="font-size:22px">＋</span>植物を追加</div>`;
+  document.getElementById('home-hint').style.display = plants.length ? 'block' : 'none';
+}
+
+function selectPlant(id) {
+  selectedId = id;
+  renderHome();
+  renderCheck();
+  renderHowto();
+  renderLog();
+}
+
+// ============================================================
+// 追加・編集モーダル
+// ============================================================
+function openAddModal() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('new-date').value = today;
+  document.getElementById('new-name').value = '';
+  document.getElementById('new-memo').value = '';
+  document.getElementById('json-date').value = today;
+  document.getElementById('json-name').value = '';
+  document.getElementById('json-paste').value = '';
+  document.getElementById('json-result').style.display = 'none';
+  document.getElementById('json-add-btn').disabled = true;
+  document.getElementById('json-add-btn').style.opacity = '.5';
+  addIcon = '🌿'; jsonIcon = '🌿';
+  document.querySelectorAll('#add-icon-grid .icon-opt').forEach((el,i) => el.classList.toggle('sel',i===0));
+  document.querySelectorAll('#json-icon-grid .icon-opt').forEach((el,i) => el.classList.toggle('sel',i===0));
+  switchAddMode('normal');
+  document.getElementById('add-modal').classList.add('open');
+}
+function closeAddModal() { document.getElementById('add-modal').classList.remove('open'); }
+function addPlant() {
+  const name = document.getElementById('new-name').value.trim();
+  if (!name) { document.getElementById('new-name').focus(); return; }
+  const id = Date.now();
+  plants.push({ id, name, icon: addIcon, since: document.getElementById('new-date').value, memo: document.getElementById('new-memo').value.trim() });
+  savePlants();
+  closeAddModal();
+  selectPlant(id);
+}
+
+function openEditModal(id) {
+  const p = plants.find(p => p.id===id); if (!p) return;
+  editingId = id; editIcon = p.icon;
+  document.getElementById('edit-name').value = p.name;
+  document.getElementById('edit-date').value = p.since || '';
+  document.getElementById('edit-memo').value = p.memo  || '';
+  const ICONS = ['🌿','🌱','🌼','🌸','🍀','🍃','🌾','🪴','🌵','🎍'];
+  document.querySelectorAll('#edit-icon-grid .icon-opt').forEach((el,i) => el.classList.toggle('sel', ICONS[i]===p.icon));
+  document.getElementById('edit-modal').classList.add('open');
+}
+function closeEditModal() { document.getElementById('edit-modal').classList.remove('open'); }
+function updatePlant() {
+  const name = document.getElementById('edit-name').value.trim();
+  if (!name) { document.getElementById('edit-name').focus(); return; }
+  const idx = plants.findIndex(p => p.id===editingId); if (idx===-1) return;
+  const oldName = plants[idx].name;
+  plants[idx] = { ...plants[idx], name, icon: editIcon, since: document.getElementById('edit-date').value, memo: document.getElementById('edit-memo').value.trim() };
+  // 植物名が変わったらAIキャッシュを植物名で引き直す（古い名前のキャッシュは残す）
+  savePlants(); closeEditModal(); renderHome();
+  if (selectedId===editingId) { renderCheck(); renderHowto(); renderLog(); }
+}
+function selIcon(mode, el, icon) {
+  const gridId = mode==='add' ? 'add-icon-grid' : mode==='json' ? 'json-icon-grid' : 'edit-icon-grid';
+  document.querySelectorAll(`#${gridId} .icon-opt`).forEach(e => e.classList.remove('sel'));
+  el.classList.add('sel');
+  if (mode==='add') addIcon=icon;
+  else if (mode==='json') jsonIcon=icon;
+  else editIcon=icon;
+}
+
+// ============================================================
+// 削除
+// ============================================================
+function openConfirmDelete(id) {
+  deletingId = id;
+  const p = plants.find(p => p.id===id);
+  document.getElementById('confirm-msg').innerHTML = `<strong>${p?p.name:''}</strong> を削除しますか？<br><span style="font-size:12px;color:var(--text-soft)">チェック・記録もすべて削除されます</span>`;
+  document.getElementById('confirm-del').classList.add('open');
+}
+function closeConfirm() { document.getElementById('confirm-del').classList.remove('open'); }
+function confirmDelete() {
+  if (!deletingId) return;
+  plants = plants.filter(p => p.id!==deletingId);
+  Object.keys(checks).forEach(k => { if (k.startsWith(deletingId+'::')) delete checks[k]; });
+  delete logs[deletingId];
+  savePlants(); saveChecks(); saveLogs();
+  if (selectedId===deletingId) selectedId = null;
+  closeConfirm(); renderHome(); renderCheck(); renderHowto(); renderLog();
+}
+
+// ============================================================
+// チェック（AI対応）
+// ============================================================
+function renderCheck() {
+  const plant = plants.find(p => p.id===selectedId);
+  document.getElementById('check-empty').style.display   = plant ? 'none' : 'block';
+  document.getElementById('check-content').style.display = plant ? 'block' : 'none';
+  if (!plant) return;
+  document.getElementById('ck-icon').textContent = plant.icon+' ';
+  document.getElementById('ck-name').textContent = plant.name+' のチェックリスト';
+
+  const builtin = getBuiltin(plant.name);
+  if (builtin) {
+    renderCheckList(builtin.checks);
+  } else if (aiCache[plant.name]) {
+    renderCheckList(aiCache[plant.name].checks);
+  } else {
+    // AI生成中
+    document.getElementById('ck-list').innerHTML = loadingHTML(plant.name, 'check');
+    updateStats([]);
+    generateAndRender(plant.name, 'check');
+  }
+}
+
+function renderCheckList(checkList) {
+  let lastCat = '';
+  document.getElementById('ck-list').innerHTML = checkList.map((c,i) => {
+    const done = isChecked(selectedId, c.freq, i);
+    const hdr = c.cat!==lastCat ? `<div class="check-section-label">${c.cat}</div>` : '';
+    lastCat = c.cat;
+    const fc = c.freq==='daily'?'f-daily':c.freq==='week'?'f-week':'f-any';
+    const fl = c.freq==='daily'?'毎日':c.freq==='week'?'週1':'随時';
+    return `${hdr}<div class="check-item${done?' done':''}" onclick="toggleCheck(${i})">
+      <div class="check-box">${done?'✓':''}</div>
+      <span class="check-label">${c.label}</span>
+      <span class="freq-tag ${fc}">${fl}</span>
+    </div>`;
+  }).join('');
+  updateStats(checkList);
+}
+
+function toggleCheck(i) {
+  if (!selectedId) return;
+  const plant = plants.find(p => p.id===selectedId);
+  const builtin = getBuiltin(plant.name);
+  const data = builtin || aiCache[plant.name];
+  if (!data) return;
+  const c = data.checks[i];
+  const newVal = !isChecked(selectedId, c.freq, i);
+  setChecked(selectedId, c.freq, i, newVal);
+  const freqLabel = c.freq==='daily'?'【毎日】':c.freq==='week'?'【週1】':'【随時】';
+  const entryText = `${freqLabel} ${c.cat.replace(/\S+\s/,'')} — ${c.label}`;
+  if (!logs[selectedId]) logs[selectedId]=[];
+  if (newVal) {
+    logs[selectedId] = logs[selectedId].filter(e => !(e.type==='check'&&e.date===today()&&e.text===entryText));
+    logs[selectedId].unshift({ date:today(), text:entryText, type:'check' });
+      // 水やりチェックの場合は最終水やり日を記録
+      if (c.cat && c.cat.includes('水やり')) {
+        waterLog[selectedId] = { date: today(), freq: c.freq, plantName: plant.name };
+        saveWater();
+        // 水やり間隔が2日以上の植物なら次回目安をログに追加
+        const interval = getWaterInterval(plant.name);
+        if (interval.min >= 2) {
+          if (!logs[selectedId]) logs[selectedId] = [];
+          logs[selectedId] = logs[selectedId].filter(e => !(e.type==='water-next'&&e.date===today()));
+          // 表示テキストは保存せず、計算に必要な情報だけ保存
+          logs[selectedId].unshift({ date: today(), type: 'water-next', waterMin: interval.min, waterMax: interval.max });
+          saveLogs();
+        }
+      }
+  } else {
+    logs[selectedId] = logs[selectedId].filter(e => !(e.type==='check'&&e.date===today()&&e.text===entryText));
+  }
+  saveLogs(); renderCheck();
+}
+
+function resetChecks() {
+  if (!selectedId) return;
+  [today(), weekKey(), 'any'].forEach(k => { const key=`${selectedId}::${k}`; if(checks[key]) delete checks[key]; });
+  saveChecks(); renderCheck();
+}
+
+function updateStats(checkList) {
+  const done  = checkList.filter((c,i) => isChecked(selectedId,c.freq,i)).length;
+  const total = checkList.length;
+  const pct   = total ? Math.round(done/total*100) : 0;
+  document.getElementById('ck-done').textContent  = done;
+  document.getElementById('ck-total').textContent = total;
+  document.getElementById('ck-pct').textContent   = pct+'%';
+  document.getElementById('ck-bar').style.width   = pct+'%';
+}
+
+// ============================================================
+// How-to（AI対応）
+// ============================================================
+function renderHowto() {
+  const plant = plants.find(p => p.id===selectedId);
+  document.getElementById('howto-empty').style.display   = plant ? 'none' : 'block';
+  document.getElementById('howto-content').style.display = plant ? 'block' : 'none';
+  if (!plant) return;
+
+  document.getElementById('ht-plant-icon').textContent = plant.icon;
+  document.getElementById('ht-plant-name').textContent = plant.name;
+
+  const builtin = getBuiltin(plant.name);
+  if (builtin) {
+    renderHowtoContent(builtin);
+  } else if (aiCache[plant.name]) {
+    renderHowtoContent(aiCache[plant.name]);
+  } else {
+    document.getElementById('ht-steps').innerHTML = loadingHTML(plant.name, 'howto');
+    document.getElementById('ht-care').innerHTML  = '';
+    document.getElementById('ht-tip').textContent = '';
+    generateAndRender(plant.name, 'howto');
+  }
+}
+
+function renderHowtoContent(data) {
+  document.getElementById('ht-steps').innerHTML = data.steps.map((s,i) =>
+    `<li class="step-item"><span class="step-num">${i+1}</span>${s}</li>`
+  ).join('');
+  document.getElementById('ht-care').innerHTML = data.care.map(c =>
+    `<li class="step-item"><span class="step-key">${c.k.slice(0,2)}</span><span><strong style="color:var(--text)">${c.k}</strong>：${c.v}</span></li>`
+  ).join('');
+  document.getElementById('ht-tip').textContent = data.tip;
+}
+
+// ============================================================
+// AI生成 共通
+// ============================================================
+function loadingHTML(name, target) {
+  return `<div class="ai-loading">
+    <span class="ai-loading-icon">🌀</span>
+    <div class="ai-loading-text"><strong>${name}</strong> の情報をAIが生成中です…<br>しばらくお待ちください</div>
+  </div>`;
+}
+
+// JSONモード関連
+let jsonIcon = '🌿';
+
+function switchAddMode(mode) {
+  const isNormal = mode === 'normal';
+  document.getElementById('add-mode-normal').style.display = isNormal ? 'block' : 'none';
+  document.getElementById('add-mode-json').style.display   = isNormal ? 'none'  : 'block';
+  document.getElementById('mode-normal-btn').style.borderBottomColor = isNormal ? 'var(--green-mid)' : 'transparent';
+  document.getElementById('mode-normal-btn').style.color   = isNormal ? 'var(--green-deep)' : 'var(--text-soft)';
+  document.getElementById('mode-normal-btn').style.fontWeight = isNormal ? '700' : '400';
+  document.getElementById('mode-json-btn').style.borderBottomColor = isNormal ? 'transparent' : 'var(--green-mid)';
+  document.getElementById('mode-json-btn').style.color   = isNormal ? 'var(--text-soft)' : 'var(--green-deep)';
+  document.getElementById('mode-json-btn').style.fontWeight = isNormal ? '400' : '700';
+}
+
+function validateJson() {
+  const raw = document.getElementById('json-paste').value.trim();
+  const result = document.getElementById('json-result');
+  const btn    = document.getElementById('json-add-btn');
+  if (!raw) { result.style.display='none'; btn.disabled=true; btn.style.opacity='.5'; return; }
+  try {
+    const d = JSON.parse(raw.replace(/```json|```/g,'').trim());
+    if (!d.checks||!d.steps||!d.care||!d.tip) throw new Error('フォーマット不正');
+    result.textContent = `✓ 有効なデータです（チェック${d.checks.length}項目・手順${d.steps.length}件）`;
+    result.className = 'json-result json-ok';
+    result.style.display = 'block';
+    btn.disabled = false; btn.style.opacity = '1';
+  } catch(e) {
+    result.textContent = '✗ JSONの形式が正しくありません。Claudeからコピーし直してください。';
+    result.className = 'json-result json-err';
+    result.style.display = 'block';
+    btn.disabled = true; btn.style.opacity = '.5';
+  }
+}
+
+function addPlantFromJson() {
+  const name = document.getElementById('json-name').value.trim();
+  if (!name) { document.getElementById('json-name').focus(); return; }
+  const raw = document.getElementById('json-paste').value.trim();
+  let data;
+  try { data = JSON.parse(raw.replace(/```json|```/g,'').trim()); } catch(e) { return; }
+  // AIキャッシュに保存
+  aiCache[name] = data;
+  saveAI();
+  // 植物を追加
+  const id = Date.now();
+  const since = document.getElementById('json-date').value;
+  plants.push({ id, name, icon: jsonIcon, since, memo: '' });
+  savePlants();
+  closeAddModal();
+  selectPlant(id);
+}
+
+function generateAndRender(name, target) {
+  const plant = plants.find(p => p.id===selectedId);
+  if (!plant) return;
+  if (target==='check' && document.getElementById('ck-list')) {
+    document.getElementById('ck-list').innerHTML = noDataHTML(name);
+  }
+  if (target==='howto' && document.getElementById('ht-steps')) {
+    document.getElementById('ht-steps').innerHTML = noDataHTML(name);
+    document.getElementById('ht-care').innerHTML = '';
+    document.getElementById('ht-tip').textContent = '';
+  }
+}
+
+function noDataHTML(name) {
+  return `<div style="background:var(--amber-pale);border-radius:var(--radius-sm);padding:14px 16px;font-size:13px;color:var(--earth);line-height:1.9">
+    <strong>${name}</strong> の専用データがまだ登録されていません。<br>
+    このClaude画面で<br>
+    「<strong>${name}のベランダ栽培データをJSONで生成して</strong>」<br>
+    と送ると、JSONを返します。<br>
+    それを「植物を追加」→「Claudeデータを貼り付け」タブから登録してください。
+  </div>`;
+}
+
+// ============================================================
+// 写真関連
+// ============================================================
+let pendingPhotos = [];
+
+function handlePhotoSelect(event) {
+  const files = Array.from(event.target.files);
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      resizeImage(e.target.result, 800, (resized) => {
+        pendingPhotos.push(resized);
+        renderPhotoPreview();
+      });
+    };
+    reader.readAsDataURL(file);
+  });
+  event.target.value = '';
+}
+
+function resizeImage(dataUrl, maxW, callback) {
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    const ratio = Math.min(maxW / img.width, maxW / img.height, 1);
+    canvas.width  = img.width  * ratio;
+    canvas.height = img.height * ratio;
+    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+    callback(canvas.toDataURL('image/jpeg', 0.75));
+  };
+  img.src = dataUrl;
+}
+
+function renderPhotoPreview() {
+  const el = document.getElementById('photo-preview');
+  el.innerHTML = pendingPhotos.map((src, i) =>
+    `<div class="photo-thumb-wrap">
+      <img class="photo-thumb" src="${src}" onclick="openPhotoModal('${src}')">
+      <button class="photo-thumb-del" onclick="removePendingPhoto(${i})">✕</button>
+    </div>`
+  ).join('');
+}
+
+function removePendingPhoto(i) {
+  pendingPhotos.splice(i, 1);
+  renderPhotoPreview();
+}
+
+function openPhotoModal(src) {
+  document.getElementById('photo-modal-img').src = src;
+  document.getElementById('photo-modal').classList.add('open');
+}
+function closePhotoModal() {
+  document.getElementById('photo-modal').classList.remove('open');
+}
+
+// ============================================================
+// リマインダー
+// ============================================================
+function getWaterInterval(plantName) {
+  if (!plantName) return { min: 2, max: 4 };
+  if (plantName.includes('ローズマリー')||plantName.includes('ラベンダー')||plantName.includes('タイム')||plantName.includes('セージ')) return { min: 5, max: 9 };
+  if (plantName.includes('バジル')||plantName.includes('パクチー')||plantName.includes('シソ')||plantName.includes('紫蘇')) return { min: 1, max: 2 };
+  if (plantName.includes('ミント')) return { min: 1, max: 3 };
+  if (plantName.includes('サボテン')||plantName.includes('多肉')) return { min: 10, max: 20 };
+  return { min: 2, max: 4 };
+}
+
+function calcWaterReminder(pid, plantName) {
+  const w = waterLog[pid];
+  if (!w) return null;
+  const interval = getWaterInterval(plantName);
+  const lastDate = new Date(w.date.replace(/\//g,'-'));
+  const now = new Date(); now.setHours(0,0,0,0);
+  const daysPassed = Math.floor((now - lastDate) / 86400000);
+  const daysUntilMin = interval.min - daysPassed;
+  const daysUntilMax = interval.max - daysPassed;
+  if (daysPassed > interval.max + 1) return { type:'urgent', msg:`水やりが遅れています！（最終：${daysPassed}日前）` };
+  if (daysUntilMin <= 1 && daysUntilMax >= 0) {
+    const when = daysUntilMin <= 0 ? '今日〜明日' : '明日あたり';
+    return { type:'soon', msg:`次の水やり目安は${when}です（最終：${daysPassed}日前）` };
+  }
+  if (daysUntilMin <= 2) return { type:'info', msg:`次の水やりまであと${daysUntilMin}日ほど（最終：${daysPassed}日前）` };
+  return null;
+}
+
+function renderReminders() {
+  const area = document.getElementById('reminder-area');
+  if (!area) return;
+  const plant = plants.find(p => p.id===selectedId);
+  if (!plant) { area.innerHTML=''; return; }
+  const r = calcWaterReminder(selectedId, plant.name);
+  if (!r) { area.innerHTML=''; return; }
+  const isUrgent = r.type === 'urgent';
+  area.innerHTML = `<div class="reminder-banner${isUrgent?' reminder-urgent':''}">
+    <span class="reminder-banner-icon">${isUrgent?'⚠️':'💧'}</span>
+    <div class="reminder-banner-body">
+      <div class="reminder-banner-title">${plant.icon} ${plant.name} の水やりリマインダー</div>
+      <div class="reminder-banner-text">${r.msg}</div>
+    </div>
+    <button class="reminder-banner-close" onclick="this.parentElement.style.display='none'">✕</button>
+  </div>`;
+}
+
+// ============================================================
+// 記録
+// ============================================================
+let editingLogIdx = null;
+let deletingLogIdx = null;
+
+function renderLog() {
+  const plant = plants.find(p => p.id===selectedId);
+  document.getElementById('log-empty').style.display   = plant ? 'none' : 'block';
+  document.getElementById('log-content').style.display = plant ? 'block' : 'none';
+  if (!plant) return;
+  document.getElementById('log-icon').textContent = plant.icon+' ';
+  document.getElementById('log-name').textContent = plant.name+' の栽培メモ';
+  renderReminders();
+  const entries = logs[selectedId] || [];
+  if (!entries.length) { document.getElementById('log-list').innerHTML='<div class="empty">まだ記録がありません</div>'; return; }
+  document.getElementById('log-list').innerHTML = entries.map((e, idx) => {
+    const isCheck = e.type === 'check';
+    const photosHtml = (e.photos && e.photos.length)
+      ? `<div class="log-photos">${e.photos.map(src=>`<img class="log-photo" src="${src}" onclick="openPhotoModal('${src}')">`).join('')}</div>`
+      : '';
+    if (isCheck) {
+      return `<div class="log-entry">
+        <div class="log-date">${e.date}</div>
+        <div class="log-entry-inner">
+          <div class="log-entry-body"><div style="font-size:12px;color:var(--green-mid);display:flex;gap:5px;align-items:flex-start"><span style="color:var(--green-soft);flex-shrink:0">✓</span><span>${e.text}</span></div></div>
+          <div class="log-entry-actions"><button class="log-act-btn del" onclick="openLogConfirm(${idx})">削除</button></div>
+        </div>
+      </div>`;
+    }
+    if (e.type === 'water-next') {
+      // 水やりした日からの経過日数で残り日数をリアルタイム計算
+      const waterDate = new Date(e.date.replace(/\//g,'-'));
+      const now = new Date(); now.setHours(0,0,0,0);
+      const passed = Math.floor((now - waterDate) / 86400000);
+      const remainMin = e.waterMin - passed;
+      const remainMax = e.waterMax - passed;
+      let displayText;
+      if (passed > e.waterMax + 1) {
+        displayText = '💧 水やりが遅れています！';
+      } else if (remainMin <= 0 && remainMax >= 0) {
+        displayText = '💧 今日〜明日が水やり目安です';
+      } else if (remainMin === 1) {
+        displayText = '💧 明日が水やり目安です';
+      } else if (remainMin > 1) {
+        displayText = `💧 次回水やり目安：あと${remainMin}〜${remainMax}日`;
+      } else {
+        displayText = '💧 そろそろ水やり時期です';
+      }
+      const isUrgent = passed > e.waterMax + 1 || (remainMin <= 0 && remainMax >= 0);
+      const bgColor = isUrgent ? '#fff3e0' : '#e8f0fe';
+      const textColor = isUrgent ? '#bf360c' : '#1a56a0';
+      return `<div class="log-entry">
+        <div class="log-date">${e.date} 水やり実施</div>
+        <div class="log-entry-inner">
+          <div class="log-entry-body"><div style="font-size:12px;color:${textColor};background:${bgColor};border-radius:6px;padding:4px 8px;display:inline-block">${displayText}</div></div>
+          <div class="log-entry-actions"><button class="log-act-btn del" onclick="openLogConfirm(${idx})">削除</button></div>
+        </div>
+      </div>`;
+    }
+    return `<div class="log-entry">
+      <div class="log-date">${e.date}</div>
+      <div class="log-entry-inner">
+        <div class="log-entry-body"><div class="log-text">${e.text}</div>${photosHtml}</div>
+        <div class="log-entry-actions">
+          <button class="log-act-btn" onclick="openEditLogModal(${idx})">編集</button>
+          <button class="log-act-btn del" onclick="openLogConfirm(${idx})">削除</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function saveMemo() {
+  const ta=document.getElementById('memo-input'), text=ta.value.trim();
+  if (!text&&pendingPhotos.length===0) { ta.focus(); return; }
+  if (!selectedId) return;
+  if (!logs[selectedId]) logs[selectedId]=[];
+  const entry = { date:today(), text: text||'（写真）', type:'memo' };
+  if (pendingPhotos.length) entry.photos = [...pendingPhotos];
+  logs[selectedId].unshift(entry);
+  saveLogs();
+  ta.value='';
+  pendingPhotos=[];
+  renderPhotoPreview();
+  renderLog();
+}
+
+function openEditLogModal(idx) {
+  editingLogIdx = idx;
+  const entry = (logs[selectedId]||[])[idx];
+  if (!entry) return;
+  document.getElementById('edit-log-text').value = entry.text;
+  document.getElementById('edit-log-modal').classList.add('open');
+}
+function closeEditLogModal() { document.getElementById('edit-log-modal').classList.remove('open'); }
+function saveEditLog() {
+  if (editingLogIdx===null||!selectedId) return;
+  const text = document.getElementById('edit-log-text').value.trim();
+  if (!text) return;
+  logs[selectedId][editingLogIdx].text = text;
+  saveLogs(); closeEditLogModal(); renderLog();
+}
+
+function openLogConfirm(idx) {
+  deletingLogIdx = idx;
+  document.getElementById('confirm-log-del').classList.add('open');
+}
+function closeLogConfirm() { document.getElementById('confirm-log-del').classList.remove('open'); }
+function confirmLogDelete() {
+  if (deletingLogIdx===null||!selectedId) return;
+  logs[selectedId].splice(deletingLogIdx, 1);
+  saveLogs(); closeLogConfirm(); renderLog();
+}
+
+// ============================================================
+// Claude API 自動生成
+// ============================================================
+async function autoGeneratePlantData(name) {
+  const prompt = `ベランダでの「${name}」栽培情報をJSON形式のみで返してください。説明不要。\n{"checks":[{"label":"土が乾いたら水やり","freq":"daily","cat":"💧 水やり"},{"label":"液肥を与えた","freq":"any","cat":"🌾 肥料"},{"label":"病気・害虫を確認","freq":"week","cat":"🔍 害虫"}],"steps":["手順1","手順2","手順3","手順4"],"care":[{"k":"水やり","v":"方法"},{"k":"日当たり","v":"場所"},{"k":"肥料","v":"頻度"},{"k":"剪定","v":"方法"},{"k":"注意","v":"ポイント"}],"tip":"最重要コツ1文"}\nchecks:6項目、steps:4項目、care:5項目。JSONのみ。`;
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:2000, messages:[{role:'user',content:prompt}] })
+    });
+    const result = await res.json();
+    const data = JSON.parse((result.content?.[0]?.text||'').replace(/```json|```/g,'').trim());
+    if (!data.checks||!data.steps||!data.care||!data.tip) throw new Error('形式不正');
+    aiCache[name] = data; saveAI();
+    const cur = plants.find(p => p.id===selectedId);
+    if (cur && cur.name===name) { renderCheck(); renderHowto(); renderHome(); }
+  } catch(e) {
+    console.warn('自動生成失敗:', e);
+    const cur = plants.find(p => p.id===selectedId);
+    if (cur && cur.name===name && document.getElementById('ck-list')) {
+      document.getElementById('ck-list').innerHTML = `<div class="ai-error">データの自動生成に失敗しました。<button class="ai-retry-btn" onclick="autoGeneratePlantData('${name}')">再試行</button></div>`;
+    }
+  }
+}
+
+// Init
+renderHome();
+</script>
+</body>
+</html>
